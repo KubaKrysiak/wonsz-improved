@@ -91,6 +91,16 @@ function move() {
 				object.exp = 0;
 				dontRemoveTail = true;
 			}
+	
+			// wonsz wszedł w obiekt
+			if(object.type==="trap"){
+				gameOver();
+			}
+			if (object.type==="potion")
+			snake.removeTail()
+			snake.removeTail()
+			snake.removeTail()
+			object.exp = 0;
 		}
 	} )
 
@@ -117,10 +127,15 @@ const jakiśObiekt = {
 let objects = [];
 
 
+
+
+
+
 function renderObject(object){
 	const colors = {
 		apple: "green",
 		trap : "brown"
+		potion : "pink"
 	}
 	ctx.fillStyle = colors[object.type];
 	ctx.fillRect(	display.offsetX + object.x * display.cellSize,
@@ -144,6 +159,18 @@ const output = {
 }
 
 let timeoutID = 0;
+function isThereAnObject (x,y){
+	for (const object of objects){
+		if(object.x == x && object.y == y)
+		return true;
+
+	}
+	return false;
+}
+
+
+
+
 function step() {
 	move()// przesunąć wonsza
 	board.render()// narysować planszę
@@ -151,6 +178,8 @@ function step() {
 	snake.render()// narysować wonsza
 
 	output.speed.innerText = stats.speed;
+	output.length.innerText = snake.sections.length;
+	output.points.innerHTML = stats.points;
 
 	objects = objects.filter( obiekt => obiekt.exp > Date.now() );
 
@@ -162,6 +191,16 @@ function step() {
 			x,
 			y,
 			exp: Date.now() + rand(2000,10000)
+		})
+	}
+	if (rand(1,15) === 10) {
+		let x = rand(0,board.width - 1);
+		let y = rand(0,board.height - 1);
+		if(!isThereAnObject(x,y)) objects.push({
+			type:"trap",
+			x,
+			y,
+			exp: Date.now() + rand(5000,15000)
 		})
 	}
 
@@ -205,6 +244,10 @@ function gameOver() {
 	gameScreen.classList.add("disabled");
 	endScreen.classList.remove("disabled");
 	document.querySelector("#end-screen-points").innerText = `you lost with ${stats.points} points`;
+	const oldHighscore = localStorage.getItem('snake-highscore');
+	const newHighscore = Math.max(oldHighscore,stats.points);
+	localStorage.setItem("snake-highscore", newHighscore)
+	document.querySelector("#end-screen-highscore").innerText = `highscore is  ${newHighscore} points`;
 	wonszVideo.play();
 }
 
